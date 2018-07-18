@@ -3,16 +3,20 @@ if [ -z "${TRILINOS_MAJOR_VERSION}" ]; then
 fi
 
 if [ ${TRILINOS_MAJOR_VERSION} = "AUTO" ] || [ ${TRILINOS_MAJOR_VERSION} = "12" ]; then
-    VERSION=12-10-1
-    CHECKSUM=40f28628b63310f9bd17c26d9ebe32b1
-    
+    VERSION=12-12-1
+    #CHECKSUM=ignore
+    CHECKSUM=ecd4606fa332212433c98bf950a69cc7
+
+    #VERSION=12-10-1
+    #CHECKSUM=40f28628b63310f9bd17c26d9ebe32b1
+
     #VERSION=12-4-2
     #CHECKSUM=4c25a757d86bde3531090bd900a2cea8
 
 elif [ ${TRILINOS_MAJOR_VERSION} = "11" ]; then
     VERSION=11-14-3
     CHECKSUM=dea62e57ebe51a886bee0b10a2176969
-    
+
     #Note: For Trilinos v11 we need to force SuperLUDist=OFF,
     #      since only the deprecated SuperLUDist v3.3 together with an Amesos patch
     #      (and not the current SuperLUDist v4.x with the same Amesos patch)
@@ -22,6 +26,7 @@ elif [ ${TRILINOS_MAJOR_VERSION} = "11" ]; then
     #      for Trilinos v12; this is neglegted by Trilinos v11 since it is unknown.
     cecho ${BAD} "trilinos: warning: forcing unset SUPERLU_DIR (not supported)"
     unset SUPERLU_DIR
+    unset SUPERLU_DIST_DIR
 
 else
     cecho ${BAD} "Unknown Trilinos version ${TRILINOS_MAJOR_VERSION} forced, please use AUTO|12|11."
@@ -29,9 +34,10 @@ else
 fi
 
 SOURCE=https://github.com/trilinos/Trilinos/archive/
+#SOURCE=http://trilinos.csbsju.edu/download/files/
 NAME=trilinos-release-${VERSION}
-EXTRACTSTO=Trilinos-trilinos-release-${VERSION}
 PACKING=.tar.gz
+EXTRACTSTO=Trilinos-trilinos-release-${VERSION}
 
 BUILDCHAIN=cmake
 
@@ -118,18 +124,21 @@ if [ ! -z "${PARMETIS_DIR}" ]; then
 fi
 
 # Add SuperLU_dist, if present
-if [ ! -z "${SUPERLU_DIR}" ]; then
+if [ ! -z "${SUPERLU_DIST_DIR}" ]; then
     cecho ${INFO} "trilinos: configuration with SuperLU_dist"
-    
+
     # we need to disable complex support in teuchos, see
     #   https://trilinos.org/pipermail/trilinos-users/2015-March/004802.html
-    
+
+    # note that superlu_dist v5.3 is now installed in lib64 instead of lib dir
+
     CONFOPTS="\
         ${CONFOPTS} \
-          -D TPL_ENABLE_SuperLUDist:BOOL=ON \
           -D Teuchos_ENABLE_COMPLEX:BOOL=OFF \
-          -D TPL_SuperLUDist_LIBRARIES:FILEPATH=${SUPERLU_DIR}/lib/libsuperlu_dist.${LDSUFFIX} \
-          -D SuperLUDist_INCLUDE_DIRS:PATH=${SUPERLU_DIR}/include \
+          -D KokkosTSQR_ENABLE_Complex:BOOL=OFF \
+          -D TPL_ENABLE_SuperLUDist:BOOL=ON \
+          -D TPL_SuperLUDist_LIBRARIES:FILEPATH=${SUPERLU_DIST_DIR}/lib64/libsuperlu_dist.${LDSUFFIX} \
+          -D SuperLUDist_INCLUDE_DIRS:PATH=${SUPERLU_DIST_DIR}/include \
           -D HAVE_SUPERLUDIST_LUSTRUCTINIT_2ARG:BOOL=ON \
           -D HAVE_SUPERLUDIST_ENUM_NAMESPACE:BOOL=ON"
 fi
