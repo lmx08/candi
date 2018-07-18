@@ -1,9 +1,14 @@
-VERSION=5.1.2
+# NOTE: superlu_dist v5.4.0 has an issue with trilinos, so don't use it so far.
+# trilinos complains that LargeDiag is not found:
+# now there are two possibilities: LargeDiag_MC64 (default as before) and one other
+#CHECKSUM=e64645c5be352ae2c88327af2cac66e1 // 5.4.0
+
+VERSION=5.3.0
 NAME=superlu_dist_${VERSION}
 EXTRACTSTO=SuperLU_DIST_${VERSION}
 SOURCE=http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
 PACKING=.tar.gz
-CHECKSUM=0a99bbb5f6c26a9c1d7ab17ea35d4e6f
+CHECKSUM=35d5aa8e0a246efaf327988b20106714
 
 BUILDCHAIN=cmake
 INSTALL_PATH=${INSTALL_PATH}/${NAME}
@@ -12,11 +17,10 @@ CONFOPTS=" \
     $CONFOPTS \
     -D TPL_PARMETIS_INCLUDE_DIRS:PATH=${PARMETIS_DIR}/include \
     -D TPL_PARMETIS_LIBRARIES:FILEPATH=${PARMETIS_DIR}/lib/libparmetis.${LDSUFFIX} \
-    -D CMAKE_C_FLAGS:STRING=\"-std=c99 -fPIC\" \
     -D BUILD_SHARED_LIBS:BOOL=ON"
 
 package_specific_register () {
-    export SUPERLU_DIR=${INSTALL_PATH}
+    export SUPERLU_DIST_DIR=${INSTALL_PATH}
 
     if [ ${PLATFORM_OSTYPE} == macos ]; then
         export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:${INSTALL_PATH}/lib
@@ -28,7 +32,7 @@ package_specific_conf () {
     CONFIG_FILE=${CONFIGURATION_PATH}/${NAME}
     rm -f $CONFIG_FILE
     echo "
-export SUPERLU_DIR=${INSTALL_PATH}
+export SUPERLU_DIST_DIR=${INSTALL_PATH}
 " >> $CONFIG_FILE
 
     if [ ${PLATFORM_OSTYPE} == macos ]; then
@@ -36,3 +40,4 @@ export SUPERLU_DIR=${INSTALL_PATH}
 " >> $CONFIG_FILE
     fi
 }
+
