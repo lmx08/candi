@@ -1,0 +1,46 @@
+# NOTE: You manually have to patch trilinos for SuperLU v5.x.x, cf.
+#       https://github.com/trilinos/Trilinos/pull/1643/files
+#       https://github.com/trilinos/Trilinos/pull/411
+# both PRs are not merge due to problems
+
+# NOTE: v5.1.1 does not compile fine nowadays (lapack issues)
+#VERSION=5.1.1
+#CHECKSUM=260a3cd90b2100122abff38587a8290a
+
+VERSION=5.2.1
+CHECKSUM=3a1a9bff20cb06b7d97c46d337504447
+
+NAME=superlu_${VERSION}
+EXTRACTSTO=SuperLU_${VERSION}
+SOURCE=http://crd-legacy.lbl.gov/~xiaoye/SuperLU/
+PACKING=.tar.gz
+
+BUILDCHAIN=cmake
+INSTALL_PATH=${INSTALL_PATH}/${NAME}
+
+CONFOPTS=" \
+    $CONFOPTS \
+    -D BUILD_SHARED_LIBS:BOOL=ON"
+
+package_specific_register () {
+    export SUPERLU_DIR=${INSTALL_PATH}
+
+    if [ ${PLATFORM_OSTYPE} == macos ]; then
+        export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:${INSTALL_PATH}/lib
+    fi
+}
+
+package_specific_conf () {
+    # Generate configuration file
+    CONFIG_FILE=${CONFIGURATION_PATH}/${NAME}
+    rm -f $CONFIG_FILE
+    echo "
+export SUPERLU_DIR=${INSTALL_PATH}
+" >> $CONFIG_FILE
+
+    if [ ${PLATFORM_OSTYPE} == macos ]; then
+        echo "export DYLD_LIBRARY_PATH=\$DYLD_LIBRARY_PATH:${INSTALL_PATH}/lib
+" >> $CONFIG_FILE
+    fi
+}
+

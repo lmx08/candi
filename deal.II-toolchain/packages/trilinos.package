@@ -143,6 +143,17 @@ if [ ! -z "${SUPERLU_DIST_DIR}" ]; then
           -D HAVE_SUPERLUDIST_ENUM_NAMESPACE:BOOL=ON"
 fi
 
+## Add SuperLU, if present
+#if [ ! -z "${SUPERLU_DIR}" ]; then
+#    cecho ${INFO} "trilinos: configuration with SuperLU"
+#
+#    CONFOPTS="\
+#        ${CONFOPTS} \
+#          -D TPL_ENABLE_SuperLU:BOOL=ON \
+#          -D TPL_SuperLU_LIBRARIES:FILEPATH=${SUPERLU_DIR}/lib64/libsuperlu.${LDSUFFIX} \
+#          -D SuperLU_INCLUDE_DIRS:PATH=${SUPERLU_DIR}/include"
+#fi
+
 #########################################################################
 # General Trilinos configuration
 
